@@ -1,0 +1,13 @@
+site_name: GenJobs
+site_description: Portable contracts for asynchronous, long-running jobs
+repo_url: https://github.com/surya-mp/genjobs
+docs_dir: docs
+theme:
+  name: material
+nav:
+  - Overview: index.md
+  - Concepts: concepts.md
+  - Modalities: modalities.md
+  - API guide: api.md
+  - Backend authoring: backends.md
+  - Publishing: publishing.md

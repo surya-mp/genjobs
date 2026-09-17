@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "genjobs-core"
+version = "0.1.0"
+description = "Portable contracts and execution primitives for asynchronous, long-running jobs."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "GenJobs contributors" }]
+keywords = ["async", "background-jobs", "job-queue", "workflow"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/surya-mp/genjobs/tree/main/docs"
+Source = "https://github.com/surya-mp/genjobs"
+Issues = "https://github.com/surya-mp/genjobs/issues"
+Changelog = "https://github.com/surya-mp/genjobs/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/genjobs_core"]

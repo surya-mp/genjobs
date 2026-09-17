@@ -1,0 +1,29 @@
+version = 1
+revision = 3
+requires-python = ">=3.11"
+resolution-markers = [
+    "python_full_version >= '3.14'",
+    "python_full_version < '3.14'",
+]
+
+[manifest]
+members = [
+    "genjobs-core",
+    "genjobs-local",
+]
+
+[[package]]
+name = "genjobs-core"
+version = "0.1.0"
+source = { editable = "packages/genjobs-core" }
+
+[[package]]
+name = "genjobs-local"
+version = "0.1.0"
+source = { editable = "packages/genjobs-local" }
+dependencies = [
+    { name = "genjobs-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "genjobs-core", editable = "packages/genjobs-core" }]

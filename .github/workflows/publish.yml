@@ -1,0 +1,55 @@
+name: Publish packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Distribution to publish
+        required: true
+        type: choice
+        options: [genjobs-core, genjobs-local]
+      version:
+        description: Exact version being released (must match the package metadata)
+        required: true
+        type: string
+  push:
+    tags: ["genjobs-core-v*", "genjobs-local-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Determine package
+        id: target
+        env:
+          INPUT_PACKAGE: ${{ inputs.package }}
+          INPUT_VERSION: ${{ inputs.version }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -n "$INPUT_PACKAGE" ]; then
+            package="$INPUT_PACKAGE"
+            version="$INPUT_VERSION"
+          else
+            package="${TAG_NAME%-v*}"
+            version="${TAG_NAME##*-v}"
+          fi
+          case "$package" in genjobs-core|genjobs-local) ;; *) exit 1 ;; esac
+          metadata_version=$(sed -n 's/^version = "\(.*\)"/\1/p' "packages/$package/pyproject.toml" | head -1)
+          test "$version" = "$metadata_version"
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: python -m pip install --upgrade build && python -m build "packages/${{ steps.target.outputs.package }}"
+      - name: Publish to PyPI via Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/${{ steps.target.outputs.package }}/dist/
