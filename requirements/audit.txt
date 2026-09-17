@@ -1,0 +1,3 @@
+# Runtime packages currently have no third-party dependencies. Keep build-time
+# dependencies pinned here so pip-audit can scan a reproducible, non-editable set.
+hatchling==1.32.3
