@@ -37,7 +37,9 @@ jobs:
       - name: Validate package metadata
         run: twine check packages/*/dist/*
       - name: Audit dependencies
-        run: pip-audit --strict
+        # Audit the pinned, non-editable build dependency set. Workspace packages
+        # are intentionally absent because they may not yet exist on PyPI.
+        run: pip-audit --strict --requirement requirements/audit.txt
       - name: Generate SBOM
         run: cyclonedx-py environment --of JSON --output-reproducible --output-file sbom.json
 

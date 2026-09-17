@@ -21,6 +21,11 @@ tests, distributions, package metadata, dependency vulnerabilities, and an SBOM
 before code merges. Publishing uses PyPI OIDC Trusted Publishing, not a stored
 long-lived token.
 
+The core packages currently have no third-party runtime dependencies. CI audits
+the pinned build dependency file at `requirements/audit.txt` rather than the
+editable workspace: an unreleased editable package cannot be looked up on PyPI
+and is not a dependency vulnerability.
+
 ## Operational extensions
 
 The core provides exponential retry configuration, retry timestamps, lifecycle
