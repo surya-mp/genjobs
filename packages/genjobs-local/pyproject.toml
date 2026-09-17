@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "genjobs-local"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local development and test backends for GenJobs."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,7 +20,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Testing",
 ]
-dependencies = ["genjobs-core>=0.1.0,<0.2.0"]
+dependencies = ["genjobs-core>=0.2.0,<0.3.0"]
 
 [tool.uv.sources]
 genjobs-core = { workspace = true }

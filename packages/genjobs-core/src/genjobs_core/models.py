@@ -40,6 +40,32 @@ class ContentKind(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
+class RetryPolicy:
+    """Retry timing controls interpreted by queues that support delayed delivery."""
+
+    initial_delay_seconds: float = 0.0
+    multiplier: float = 2.0
+    max_delay_seconds: float = 300.0
+
+    def __post_init__(self) -> None:
+        if self.initial_delay_seconds < 0:
+            raise ValueError("initial_delay_seconds must not be negative")
+        if self.multiplier < 1:
+            raise ValueError("multiplier must be at least 1")
+        if self.max_delay_seconds < self.initial_delay_seconds:
+            raise ValueError("max_delay_seconds must be at least initial_delay_seconds")
+
+    def delay_for_attempt(self, failed_attempt: int) -> float:
+        """Return exponential backoff for a failed one-based attempt number."""
+        if failed_attempt < 1:
+            raise ValueError("failed_attempt must be at least 1")
+        return min(
+            self.initial_delay_seconds * self.multiplier ** (failed_attempt - 1),
+            self.max_delay_seconds,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class InputAsset:
     """A task input referenced by a path, URI, object key, or opaque handle."""
 
@@ -62,6 +88,7 @@ class JobRequest:
     inputs: tuple[InputAsset, ...] = ()
     idempotency_key: str | None = None
     max_attempts: int = 1
+    retry_policy: RetryPolicy = field(default_factory=RetryPolicy)
     artifact_ttl_seconds: int = 3600
 
     def __post_init__(self) -> None:
@@ -118,6 +145,9 @@ class Job:
     updated_at: datetime = field(default_factory=utcnow)
     attempt: int = 0
     progress: float = 0.0
+    retry_at: datetime | None = None
+    heartbeat_at: datetime | None = None
+    cancel_requested: bool = False
     message: str | None = None
     output: dict[str, object] | None = None
     artifacts: list[Artifact] = field(default_factory=list[Artifact])

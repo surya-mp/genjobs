@@ -2,6 +2,7 @@
 
 from .engine import GenJobs
 from .errors import GenJobsError, InvalidStateTransitionError, JobNotFoundError, TaskNotFoundError
+from .events import JobEvent, JobObserver
 from .models import (
     Artifact,
     ArtifactInput,
@@ -10,6 +11,7 @@ from .models import (
     Job,
     JobRequest,
     JobStatus,
+    RetryPolicy,
     TaskResult,
 )
 from .tasks import TaskContext
@@ -23,9 +25,12 @@ __all__ = [
     "InputAsset",
     "InvalidStateTransitionError",
     "Job",
+    "JobEvent",
     "JobNotFoundError",
+    "JobObserver",
     "JobRequest",
     "JobStatus",
+    "RetryPolicy",
     "TaskContext",
     "TaskNotFoundError",
     "TaskResult",

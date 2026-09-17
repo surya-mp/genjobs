@@ -1,3 +1,4 @@
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,7 @@ from genjobs_core import (
     GenJobs,
     JobRequest,
     JobStatus,
+    RetryPolicy,
     TaskContext,
     TaskResult,
 )
@@ -99,3 +101,41 @@ async def test_retries_until_the_configured_attempt_limit(tmp_path: Path) -> Non
     assert completed.id == submitted.id
     assert completed.status is JobStatus.SUCCEEDED
     assert completed.attempt == 2
+
+
+@pytest.mark.asyncio
+async def test_retry_backoff_defers_a_second_attempt(tmp_path: Path) -> None:
+    jobs = GenJobs(
+        artifacts=LocalArtifactStore(tmp_path / "artifacts"),
+        jobs=InMemoryJobStore(),
+        queue=InMemoryJobQueue(),
+    )
+
+    @jobs.task("flaky")
+    async def flaky(context: TaskContext, payload: dict[str, object]) -> TaskResult:
+        if context.job.attempt == 1:
+            raise RuntimeError("temporary failure")
+        return TaskResult()
+
+    await jobs.submit(
+        JobRequest(
+            task="flaky",
+            max_attempts=2,
+            retry_policy=RetryPolicy(initial_delay_seconds=0.01),
+        )
+    )
+    assert (await jobs.run_next()).status is JobStatus.QUEUED
+    assert await jobs.run_next() is None
+    await asyncio.sleep(0.02)
+    assert (await jobs.run_next()).status is JobStatus.SUCCEEDED
+
+
+@pytest.mark.asyncio
+async def test_rejects_non_json_payloads(tmp_path: Path) -> None:
+    jobs = GenJobs(
+        artifacts=LocalArtifactStore(tmp_path / "artifacts"),
+        jobs=InMemoryJobStore(),
+        queue=InMemoryJobQueue(),
+    )
+    with pytest.raises(ValueError, match="JSON serializable"):
+        await jobs.submit(JobRequest(task="test", payload={"invalid": object()}))

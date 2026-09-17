@@ -10,4 +10,5 @@ nav:
   - Modalities: modalities.md
   - API guide: api.md
   - Backend authoring: backends.md
+  - Maintenance: maintenance.md
   - Publishing: publishing.md

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import heapq
 import shutil
 from datetime import UTC, datetime
 from pathlib import Path
+from time import monotonic
 from uuid import uuid4
 
 from genjobs_core.errors import JobNotFoundError
@@ -47,16 +49,22 @@ class InMemoryJobStore:
 
 class InMemoryJobQueue:
     def __init__(self) -> None:
-        self._queue: asyncio.Queue[str] = asyncio.Queue()
+        self._queue: list[tuple[float, int, str]] = []
+        self._sequence = 0
+        self._lock = asyncio.Lock()
 
-    async def enqueue(self, job_id: str) -> None:
-        await self._queue.put(job_id)
+    async def enqueue(self, job_id: str, *, delay_seconds: float = 0.0) -> None:
+        if delay_seconds < 0:
+            raise ValueError("delay_seconds must not be negative")
+        async with self._lock:
+            self._sequence += 1
+            heapq.heappush(self._queue, (monotonic() + delay_seconds, self._sequence, job_id))
 
     async def dequeue(self) -> str | None:
-        try:
-            return self._queue.get_nowait()
-        except asyncio.QueueEmpty:
-            return None
+        async with self._lock:
+            if not self._queue or self._queue[0][0] > monotonic():
+                return None
+            return heapq.heappop(self._queue)[2]
 
 
 class LocalArtifactStore:

@@ -14,12 +14,12 @@ members = [
 
 [[package]]
 name = "genjobs-core"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "packages/genjobs-core" }
 
 [[package]]
 name = "genjobs-local"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "packages/genjobs-local" }
 dependencies = [
     { name = "genjobs-core" },

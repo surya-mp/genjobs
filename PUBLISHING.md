@@ -47,8 +47,8 @@ all integrations into one install.
    git push origin genjobs-core-v0.1.0
    ```
 
-   Or launch **Publish packages** manually and supply the distribution and exact
-   version. The workflow rejects a version that does not match package metadata.
+   The tag is the only publishing trigger. The workflow rejects a version that
+   does not match package metadata, preventing accidental duplicate releases.
 6. Approve the `pypi` GitHub environment if required, then verify the release on
    PyPI and install it into a clean virtual environment.
 7. Create a GitHub release from the same tag, linking the relevant changelog
